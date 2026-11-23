@@ -114,26 +114,6 @@
     font-size:16px;font-weight:700;cursor:pointer;min-height:56px}
   .home-btn:active{background:var(--card2)}
 
-  /* Swipe între scenarii */
-  #scen{touch-action:pan-y}
-  .now .home{display:grid;place-items:center;flex:0 0 40px;height:40px;border-radius:12px;background:#22262e}
-  .now .home svg{width:20px;height:20px;fill:none;stroke:var(--txt);stroke-width:2;stroke-linejoin:round}
-  .pn{display:flex;align-items:center;gap:8px;padding:0 0 10px}
-  .pv,.nx{flex:1 1 0;min-width:0;display:flex;align-items:center;gap:6px;min-height:44px;padding:0 12px;border-radius:12px;
-    background:#1c2026;border:1px solid var(--line);font-size:13.5px;font-weight:700;cursor:pointer;transition:transform .12s,background .2s}
-  .nx{justify-content:flex-end}
-  .pv:active,.nx:active{transform:scale(.96);background:#262b33}
-  .pt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .ar{color:var(--acc);font-size:22px;line-height:1;font-weight:400;margin-top:-2px}
-  .dots{display:flex;align-items:center;justify-content:center;gap:5px;flex:0 0 auto}
-  .dots i{width:5px;height:5px;border-radius:3px;background:#3a404a;transition:width .25s,background .25s}
-  .dots i.on{width:14px;background:var(--acc)}
-  .dots i.gap{margin-left:4px}
-  .hint{text-align:center;color:var(--mut);font-size:12.5px;margin-top:12px}
-  #out{will-change:transform}
-  #out.fromR{animation:in .28s cubic-bezier(.2,.9,.3,1)}
-  #out.fromL{animation:inL .28s cubic-bezier(.2,.9,.3,1)}
-
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -159,20 +139,14 @@
 <section class="page" id="scen">
   <div class="now" id="now">
     <button class="now-in" id="nowBtn" aria-label="Înapoi la pagina principală">
-      <span class="home"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg></span>
+      <span class="back">‹</span>
       <span class="e" id="nowE"></span>
       <span class="nm"><span class="lb">Scenariu ales</span><span class="tt" id="nowN"></span></span>
       <span class="c" id="nowC"></span>
     </button>
-    <div class="pn">
-      <button class="pv" id="prevBtn" aria-label="Scenariul anterior"><span class="ar">‹</span><span class="pt" id="prevT"></span></button>
-      <div class="dots" id="dots"></div>
-      <button class="nx" id="nextBtn" aria-label="Scenariul următor"><span class="pt" id="nextT"></span><span class="ar">›</span></button>
-    </div>
     <div class="track"><div class="fill" id="nowF"></div></div>
   </div>
   <div class="card" id="out"></div>
-  <p class="hint">poți și să glisezi stânga / dreapta pentru alt scenariu</p>
   <button class="home-btn" id="homeBtn">‹ Alege alt scenariu</button>
 </section>
 
@@ -205,9 +179,6 @@ const out=$("out");
 const CHK='<span class="chk"><svg viewBox="0 0 24 24"><path d="M6 12.5l4 4 8-9"/></svg></span>';
 const buzz=ms=>{try{navigator.vibrate&&navigator.vibrate(ms)}catch(e){}};
 
-/* Bifele rămân ținute minte cât timp aplicația e deschisă */
-const DONE={};
-
 /* Construiește scenariul pe pagina lui */
 function build(p){
   $("nowE").textContent=p.e;
@@ -217,13 +188,7 @@ function build(p){
     p.r.map(([k,v,s],i)=>`<div class="row" data-i="${i}">${CHK}<div class="k">${k}</div><div class="v">${v}${s?`<small>${s}</small>`:""}</div></div>`).join("")+
     `<div class="ok" id="ok">✅ Gata, camera e setată!</div>`;
   const rows=[...out.querySelectorAll(".row")];
-  const st=DONE[p.id]||(DONE[p.id]=new Set());
-  rows.forEach((r,i)=>r.classList.toggle("done",st.has(i)));
-  const ix=P.findIndex(x=>x.id===p.id),pp=P[(ix-1+P.length)%P.length],nn=P[(ix+1)%P.length];
-  const sh=x=>`${x.e} ${x.n.replace("Point & Shoot ","")}`;
-  $("prevT").textContent=sh(pp);$("nextT").textContent=sh(nn);
-  $("dots").innerHTML=P.map((x,i)=>`<i class="${x.id===p.id?"on":""}${i>0&&x.g!==P[i-1].g?" gap":""}"></i>`).join("");
-  const upd=()=>{st.clear();rows.forEach((r,i)=>r.classList.contains("done")&&st.add(i));const n=rows.filter(r=>r.classList.contains("done")).length,t=rows.length,pc=(n/t*100)+"%";
+  const upd=()=>{const n=rows.filter(r=>r.classList.contains("done")).length,t=rows.length,pc=(n/t*100)+"%";
     $("cnt").innerHTML=`<b>${n}</b> / ${t} setate`;$("fill").style.width=pc;
     $("nowC").innerHTML=`<b>${n}</b>/${t}`;$("nowF").style.width=pc;
     const nx=rows.find(x=>!x.classList.contains("done"));
@@ -274,35 +239,6 @@ $("fpsTab").onclick=()=>{buzz(8);pushed=true;location.hash="120fps"};
 $("nowBtn").onclick=$("homeBtn").onclick=$("fpsBack").onclick=$("fpsHome").onclick=()=>{buzz(8);
   if(pushed)history.back();
   else{history.replaceState(null,"",location.pathname+location.search);route();}};
-
-/* Swipe stânga/dreapta = scenariul următor/anterior */
-function go(dir){
-  const i=P.findIndex(x=>x.id===cur);
-  const n=P[(i+dir+P.length)%P.length];
-  history.replaceState(null,"","#"+n.id);
-  route();
-  out.classList.remove("fromR","fromL");void out.offsetWidth;
-  out.classList.add(dir>0?"fromR":"fromL");
-  buzz(10);
-}
-(()=>{let x0=0,y0=0,dx=0,mode="";const sc=$("scen");
-  sc.addEventListener("touchstart",e=>{const t=e.touches[0];
-    if(t.clientX<24||t.clientX>innerWidth-24){mode="x-ignore";return;}
-    x0=t.clientX;y0=t.clientY;dx=0;mode="";},{passive:true});
-  sc.addEventListener("touchmove",e=>{if(mode==="x-ignore"||mode==="y")return;
-    const t=e.touches[0];dx=t.clientX-x0;const dy=t.clientY-y0;
-    if(!mode){if(Math.abs(dx)<10&&Math.abs(dy)<10)return;mode=Math.abs(dx)>Math.abs(dy)?"x":"y";}
-    if(mode==="x"){out.style.transition="none";out.style.transform=`translateX(${dx*.4}px)`;out.style.opacity=1-Math.min(Math.abs(dx)/600,.4);}
-  },{passive:true});
-  sc.addEventListener("touchend",()=>{if(mode==="x"){
-      out.style.transition="transform .2s,opacity .2s";out.style.transform="";out.style.opacity="";
-      if(Math.abs(dx)>70)go(dx<0?1:-1);}
-    mode="";},{passive:true});
-})();
-$("prevBtn").onclick=()=>go(-1);
-$("nextBtn").onclick=()=>go(1);
-addEventListener("keydown",e=>{if(!$("scen").classList.contains("on"))return;
-  if(e.key==="ArrowRight")go(1);if(e.key==="ArrowLeft")go(-1);});
 addEventListener("hashchange",route);
 route();
 
