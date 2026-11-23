@@ -10,40 +10,120 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <style>
-  :root{--bg:#0e1013;--card:#181b20;--line:#262a31;--txt:#f2f3f5;--mut:#8b919b;--acc:#f5b83d;}
+  :root{
+    --bg:#0e1013;--card:#16191e;--card2:#1c2026;--line:#252a32;
+    --txt:#f3f4f6;--mut:#8d94a0;
+    --acc:#ff7a3d;--acc2:#ffb03d;--accbg:rgba(255,122,61,.12);
+    --ok:#3ddc84;--okbg:rgba(61,220,132,.10);
+    --r:18px;
+  }
   *{box-sizing:border-box;margin:0;padding:0}
   html{background:var(--bg)}
-  body{background:var(--bg);color:var(--txt);font:16px/1.4 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif;padding:calc(14px + env(safe-area-inset-top)) 12px calc(40px + env(safe-area-inset-bottom));-webkit-tap-highlight-color:transparent;overscroll-behavior-y:contain}
-  h1{font-size:19px;font-weight:700;margin:4px 4px 2px}
-  .sub{color:var(--mut);font-size:13px;margin:0 4px 14px}
-  .group{color:var(--mut);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin:6px 4px 8px}
-  .tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
-  .tab{background:var(--card);border:1px solid var(--line);color:var(--txt);border-radius:14px;padding:14px 10px;font-size:15px;font-weight:600;text-align:left;cursor:pointer}
-  .tab .e{font-size:22px;display:block;margin-bottom:4px}
-  .tab.on{border-color:var(--acc);background:#262012}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
-  .card h2{font-size:18px;padding:14px 16px;border-bottom:1px solid var(--line)}
-  .row{display:flex;justify-content:space-between;gap:14px;padding:13px 16px;border-bottom:1px solid var(--line)}
-  .row:last-child{border-bottom:0}
-  .k{color:var(--mut);font-size:14px;flex:0 0 38%}
-  .v{font-size:17px;font-weight:600;text-align:right}
-  .row{cursor:pointer;transition:background .15s}
-  .row.done{background:#13251a}.row.done .k::before{content:"✓ ";color:#4ad07a;font-weight:700}
-  .row.done .v{color:#7fdc9c}
-  .bar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--line);font-size:14px;color:var(--mut)}
-  .bar button{background:#2a2e36;color:var(--txt);border:0;border-radius:10px;padding:8px 12px;font-size:14px}
-  .ok{padding:14px 16px;color:#4ad07a;font-weight:700;text-align:center;display:none}
+  body{background:var(--bg);color:var(--txt);font:16px/1.4 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif;
+    padding:0 14px calc(48px + env(safe-area-inset-bottom));
+    -webkit-tap-highlight-color:transparent;overscroll-behavior-y:contain}
+  button{font:inherit;color:inherit;-webkit-user-select:none;user-select:none}
+
+  /* Antet */
+  .head{display:flex;align-items:center;gap:12px;margin:2px 2px 6px}
+  .rec{width:10px;height:10px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 4px var(--accbg);flex:0 0 auto;animation:pulse 2.4s ease-in-out infinite}
+  @keyframes pulse{50%{box-shadow:0 0 0 7px rgba(255,122,61,.04)}}
+  h1{font-size:22px;font-weight:800;letter-spacing:-.01em}
+  .sub{color:var(--mut);font-size:14px;margin:0 2px 18px}
+
+  /* Bara de sus cu scenariul selectat (mereu vizibilă) */
+  .now{position:sticky;top:0;z-index:10;margin:0 -14px 16px;padding:calc(10px + env(safe-area-inset-top)) 14px 0;
+    background:rgba(14,16,19,.92);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .now-in{display:flex;align-items:center;gap:12px;width:100%;background:none;border:0;text-align:left;cursor:pointer;padding:2px 0 10px}
+  .now .e{display:grid;place-items:center;flex:0 0 44px;height:44px;border-radius:13px;background:var(--accbg);border:1.5px solid var(--acc);font-size:24px}
+  .now .nm{flex:1;min-width:0}
+  .now .lb{display:block;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)}
+  .now .tt{display:block;font-size:17px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .now .c{font-size:15px;font-weight:700;color:var(--mut);white-space:nowrap}
+  .now .c b{color:var(--txt)}
+  .now .track{height:4px;border-radius:0;margin:0 -14px;background:#20242b}
+  .now .fill{border-radius:0}
+  .now.all .fill{background:var(--ok)}
+  .now.all .c,.now.all .c b{color:var(--ok)}
+  .now.pulse .e{animation:pop .35s cubic-bezier(.3,1.6,.5,1)}
+
+  .group{color:var(--mut);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin:4px 4px 10px}
+
+  /* Butoane scenariu */
+  .tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+  .tab{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-height:112px;
+    background:linear-gradient(160deg,var(--card2),var(--card));border:1.5px solid var(--line);border-radius:var(--r);
+    padding:14px 14px 13px;text-align:left;cursor:pointer;transition:transform .12s,border-color .2s,box-shadow .2s,background .2s}
+  .tab:active{transform:scale(.97)}
+  .tab .e{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:#22262e;font-size:26px;transition:background .2s}
+  .tab .t{font-size:16px;font-weight:700;line-height:1.2}
+  .tab .s{display:block;font-size:12.5px;font-weight:500;color:var(--mut);margin-top:3px}
+  .tab.on{border-color:var(--acc);background:linear-gradient(160deg,#2a1c14,#1a1512);box-shadow:0 6px 22px -8px rgba(255,122,61,.55)}
+  .tab.on .e{background:var(--accbg)}
+  .tab::after{content:"";position:absolute;top:12px;right:12px;width:22px;height:22px;border-radius:50%;
+    background:var(--acc) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 12.5l4 4 8-9' fill='none' stroke='%23140a05' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/15px no-repeat;
+    transform:scale(0);transition:transform .25s cubic-bezier(.3,1.6,.5,1)}
+  .tab.on::after{transform:scale(1)}
+  .tab:last-child:nth-child(odd){grid-column:1/-1;flex-direction:row;align-items:center;min-height:78px;gap:14px}
+
+  /* Card setări */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r)}
+  .card h2{font-size:19px;font-weight:800;padding:16px 16px 4px}
+  .card .d{display:block;color:var(--mut);font-size:14px;font-weight:500;padding:0 16px 12px}
+  .bar{display:flex;align-items:center;gap:12px;
+    padding:10px 12px 12px 16px;background:var(--card);
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .prog{flex:1}
+  .cnt{font-size:14px;color:var(--mut);margin-bottom:7px}
+  .cnt b{color:var(--txt);font-size:16px}
+  .track{height:8px;border-radius:8px;background:#262b33;overflow:hidden}
+  .fill{height:100%;width:0;border-radius:8px;background:linear-gradient(90deg,var(--acc),var(--acc2));transition:width .45s cubic-bezier(.2,.9,.3,1),background .3s}
+  .card.all .fill{background:var(--ok)}
+  .rst{background:#262b33;border:0;border-radius:12px;padding:12px 14px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px}
+  .rst:active{background:#30363f}
+
+  .row{position:relative;display:flex;align-items:center;gap:12px;padding:14px 16px;min-height:60px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .25s}
+  .row:last-of-type{border-bottom:0}
+  .row:active{background:#1d2127}
+  .chk{flex:0 0 28px;width:28px;height:28px;border-radius:50%;border:2px solid #3a404a;display:grid;place-items:center;transition:border-color .2s,background .2s,transform .2s}
+  .chk svg{width:16px;height:16px}
+  .chk path{fill:none;stroke:#0b1a11;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:20;stroke-dashoffset:20;transition:stroke-dashoffset .3s .08s ease-out}
+  .k{color:var(--mut);font-size:14px;flex:0 0 32%}
+  .v{flex:1;font-size:17px;font-weight:700;text-align:right;transition:color .25s}
   .v small{display:block;font-size:13px;font-weight:400;color:var(--mut);margin-top:2px}
-.info{background:var(--card);border:1px solid var(--line);border-radius:16px;margin-top:14px;overflow:hidden}
-  .info h2{font-size:17px;padding:14px 16px;border-bottom:1px solid var(--line)}
-  .info li{list-style:none;padding:12px 16px;border-bottom:1px solid var(--line);font-size:15px}
+  .row.done{background:var(--okbg)}
+  .row.done .chk{background:var(--ok);border-color:var(--ok);animation:pop .35s cubic-bezier(.3,1.6,.5,1)}
+  .row.done .chk path{stroke-dashoffset:0}
+  .row.done .v{color:#86e8af}
+  .row.next .chk{border-color:var(--acc);box-shadow:0 0 0 4px var(--accbg)}
+  @keyframes pop{0%{transform:scale(.6)}100%{transform:scale(1)}}
+
+  .ok{display:none;margin:12px;padding:16px;border-radius:14px;background:var(--okbg);border:1px solid rgba(61,220,132,.35);
+    color:var(--ok);font-weight:800;font-size:17px;text-align:center}
+  .card.all .ok{display:block;animation:rise .5s cubic-bezier(.3,1.4,.5,1)}
+  @keyframes rise{0%{opacity:0;transform:translateY(10px) scale(.95)}100%{opacity:1;transform:none}}
+
+  /* Info 120 fps */
+  .info{background:var(--card);border:1px solid var(--line);border-radius:var(--r);margin-top:16px;overflow:hidden}
+  .info h2{font-size:17px;font-weight:800;padding:15px 16px;border-bottom:1px solid var(--line)}
+  .info li{list-style:none;padding:13px 16px;border-bottom:1px solid var(--line);font-size:15px}
   .info li:last-child{border-bottom:0}
   .info b{display:block;font-size:16px;margin-bottom:2px}
   .info span{color:var(--mut)}
-  </style>
+
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
 </head>
 <body>
-<h1>DJI Osmo Action 4</h1>
+<div class="now" id="now">
+  <button class="now-in" id="nowBtn" aria-label="Mergi la setări">
+    <span class="e" id="nowE"></span>
+    <span class="nm"><span class="lb">Scenariu ales</span><span class="tt" id="nowN"></span></span>
+    <span class="c" id="nowC"></span>
+  </button>
+  <div class="track"><div class="fill" id="nowF"></div></div>
+</div>
+<div class="head"><span class="rec"></span><h1>DJI Osmo Action 4</h1></div>
 <p class="sub">Alege scenariul → bifează fiecare setare pe care ai făcut-o în cameră</p>
 
 <div class="group">Point &amp; Shoot</div>
@@ -67,31 +147,50 @@
 <script src="presets.js"></script>
 <script>
 const out=document.getElementById("out");
+const CHK='<span class="chk"><svg viewBox="0 0 24 24"><path d="M6 12.5l4 4 8-9"/></svg></span>';
+const buzz=ms=>{try{navigator.vibrate&&navigator.vibrate(ms)}catch(e){}};
 function show(id){
   const p=P.find(x=>x.id===id)||P[0];
   document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.id===p.id));
-  out.innerHTML=`<h2>${p.e} ${p.n}${p.d?` <span style="color:var(--mut);font-weight:400;font-size:14px">· ${p.d}</span>`:""}</h2>`+
-    `<div class="bar"><span id="cnt"></span><button id="rst">Resetează</button></div>`+
-    p.r.map(([k,v,s],i)=>`<div class="row" data-i="${i}"><div class="k">${k}</div><div class="v">${v}${s?`<small>${s}</small>`:""}</div></div>`).join("")+
+  const now=document.getElementById("now");
+  document.getElementById("nowE").textContent=p.e;
+  document.getElementById("nowN").textContent=p.n;
+  now.classList.remove("pulse");void now.offsetWidth;now.classList.add("pulse");
+  out.innerHTML=`<h2>${p.e} ${p.n}</h2>${p.d?`<span class="d">${p.d}</span>`:'<span class="d"></span>'}`+
+    `<div class="bar"><div class="prog"><div class="cnt" id="cnt"></div><div class="track"><div class="fill" id="fill"></div></div></div><button class="rst" id="rst">Resetează</button></div>`+
+    p.r.map(([k,v,s],i)=>`<div class="row" data-i="${i}">${CHK}<div class="k">${k}</div><div class="v">${v}${s?`<small>${s}</small>`:""}</div></div>`).join("")+
     `<div class="ok" id="ok">✅ Gata, camera e setată!</div>`;
   const rows=[...out.querySelectorAll(".row")];
   const upd=()=>{const n=rows.filter(r=>r.classList.contains("done")).length;
-    document.getElementById("cnt").textContent=`${n} / ${rows.length} setate`;
-    document.getElementById("ok").style.display=n===rows.length?"block":"none";};
-  rows.forEach(r=>r.onclick=()=>{r.classList.toggle("done");upd();
+    document.getElementById("cnt").innerHTML=`<b>${n}</b> / ${rows.length} setate`;
+    document.getElementById("fill").style.width=(n/rows.length*100)+"%";
+    document.getElementById("nowC").innerHTML=`<b>${n}</b>/${rows.length}`;
+    document.getElementById("nowF").style.width=(n/rows.length*100)+"%";
+    document.getElementById("now").classList.toggle("all",n===rows.length);
+    const nx=rows.find(x=>!x.classList.contains("done"));
+    rows.forEach(r=>r.classList.toggle("next",r===nx));
+    out.classList.toggle("all",n===rows.length);
+    return n;};
+  rows.forEach(r=>r.onclick=()=>{r.classList.toggle("done");
+    const n=upd();
+    if(n===rows.length){buzz([30,60,30]);document.getElementById("ok").scrollIntoView({behavior:"smooth",block:"center"});return;}
+    buzz(12);
     const nx=rows.find(x=>!x.classList.contains("done"));
     if(r.classList.contains("done")&&nx)nx.scrollIntoView({behavior:"smooth",block:"center"});});
-  document.getElementById("rst").onclick=()=>{rows.forEach(r=>r.classList.remove("done"));upd();};
+  document.getElementById("rst").onclick=()=>{rows.forEach(r=>r.classList.remove("done"));upd();buzz(20);};
   upd();
   try{localStorage.setItem("osmo",p.id)}catch(e){}
 }
 P.forEach(p=>{
   const b=document.createElement("button");
   b.className="tab";b.dataset.id=p.id;
-  b.innerHTML=`<span class="e">${p.e}</span>${p.n.replace("Point & Shoot ","")}`;
-  b.onclick=()=>{show(p.id);out.scrollIntoView({behavior:"smooth",block:"start"})};
+  const sub=p.d||`${p.r.length} setări`;
+  b.innerHTML=`<span class="e">${p.e}</span><span class="t">${p.n.replace("Point & Shoot ","")}<span class="s">${sub}</span></span>`;
+  b.onclick=()=>{buzz(8);show(p.id);goOut()};
   document.getElementById(p.g===1?"t1":"t2").appendChild(b);
 });
+const goOut=()=>{const y=out.getBoundingClientRect().top+scrollY-document.getElementById("now").offsetHeight-8;scrollTo({top:y,behavior:"smooth"})};
+document.getElementById("nowBtn").onclick=goOut;
 let last="zi";try{last=localStorage.getItem("osmo")||"zi"}catch(e){}
 show(last);
 
