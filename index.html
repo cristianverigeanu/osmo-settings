@@ -125,7 +125,7 @@
   .pv:active,.nx:active{transform:scale(.96);background:#262b33}
   .pt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .ar{color:var(--acc);font-size:22px;line-height:1;font-weight:400;margin-top:-2px}
-  .dots{display:flex;align-items:center;justify-content:center;gap:5px;flex:0 0 auto}
+  .dots{flex:0 0 auto;min-width:40px;text-align:center;font-size:12.5px;font-weight:700;color:var(--mut);font-variant-numeric:tabular-nums}
   .dots i{width:5px;height:5px;border-radius:3px;background:#3a404a;transition:width .25s,background .25s}
   .dots i.on{width:14px;background:var(--acc)}
   .dots i.gap{margin-left:4px}
@@ -148,9 +148,11 @@
   <div class="tabs" id="t1"></div>
   <div class="group">Scenarii speciale</div>
   <div class="tabs" id="t2"></div>
+  <div class="group">Timelapse</div>
+  <div class="tabs" id="t3"></div>
 
   <div class="group">Sfaturi</div>
-  <div class="tabs" id="t3">
+  <div class="tabs" id="t4">
     <button class="tab" id="fpsTab"><span class="e">🎞️</span><span class="t">Când folosești 120 fps</span></button>
   </div>
 </section>
@@ -161,7 +163,7 @@
     <button class="now-in" id="nowBtn" aria-label="Înapoi la pagina principală">
       <span class="home"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg></span>
       <span class="e" id="nowE"></span>
-      <span class="nm"><span class="lb">Scenariu ales</span><span class="tt" id="nowN"></span></span>
+      <span class="nm"><span class="lb" id="nowG"></span><span class="tt" id="nowN"></span></span>
       <span class="c" id="nowC"></span>
     </button>
     <div class="pn">
@@ -205,6 +207,9 @@ const out=$("out");
 const CHK='<span class="chk"><svg viewBox="0 0 24 24"><path d="M6 12.5l4 4 8-9"/></svg></span>';
 const buzz=ms=>{try{navigator.vibrate&&navigator.vibrate(ms)}catch(e){}};
 
+/* Numele categoriilor (apar sus, deasupra scenariului ales) */
+const GRUPE={1:"Point & Shoot",2:"Scenarii speciale",3:"Timelapse"};
+
 /* Bifele rămân ținute minte cât timp aplicația e deschisă */
 const DONE={};
 
@@ -212,6 +217,7 @@ const DONE={};
 function build(p){
   $("nowE").textContent=p.e;
   $("nowN").textContent=p.n;
+  $("nowG").textContent=GRUPE[p.g]||"";
   out.innerHTML=`<h2>${p.e} ${p.n}</h2><span class="d">${p.d||""}</span>`+
     `<div class="bar"><div class="prog"><div class="cnt" id="cnt"></div><div class="track"><div class="fill" id="fill"></div></div></div><button class="rst" id="rst">Resetează</button></div>`+
     p.r.map(([k,v,s],i)=>`<div class="row" data-i="${i}">${CHK}<div class="k">${k}</div><div class="v">${v}${s?`<small>${s}</small>`:""}</div></div>`).join("")+
@@ -222,7 +228,7 @@ function build(p){
   const ix=P.findIndex(x=>x.id===p.id),pp=P[(ix-1+P.length)%P.length],nn=P[(ix+1)%P.length];
   const sh=x=>`${x.e} ${x.n.replace("Point & Shoot ","")}`;
   $("prevT").textContent=sh(pp);$("nextT").textContent=sh(nn);
-  $("dots").innerHTML=P.map((x,i)=>`<i class="${x.id===p.id?"on":""}${i>0&&x.g!==P[i-1].g?" gap":""}"></i>`).join("");
+  $("dots").textContent=`${ix+1}/${P.length}`;
   const upd=()=>{st.clear();rows.forEach((r,i)=>r.classList.contains("done")&&st.add(i));const n=rows.filter(r=>r.classList.contains("done")).length,t=rows.length,pc=(n/t*100)+"%";
     $("cnt").innerHTML=`<b>${n}</b> / ${t} setate`;$("fill").style.width=pc;
     $("nowC").innerHTML=`<b>${n}</b>/${t}`;$("nowF").style.width=pc;
@@ -246,7 +252,7 @@ P.forEach(p=>{
   b.className="tab";b.dataset.id=p.id;
   b.innerHTML=`<span class="e">${p.e}</span><span class="t">${p.n.replace("Point & Shoot ","")}</span>`;
   b.onclick=()=>{buzz(8);pushed=true;location.hash=p.id};
-  $(p.g===1?"t1":"t2").appendChild(b);
+  $("t"+(p.g||1)).appendChild(b);
 });
 
 /* Navigare între pagini (merge și butonul Înapoi al telefonului) */

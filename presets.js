@@ -5,7 +5,7 @@
      ["Setare","Valoare","notă mică (opțional)"],
      ...
    ]},
-   g:1 = grupul „Point & Shoot”, g:2 = grupul „Scenarii speciale”.
+   g:1 = grupul „Point & Shoot”, g:2 = grupul „Scenarii speciale”, g:3 = grupul „Timelapse”.
    După ce modifici, mărește VERSION în sw.js (ex: v1 → v2).
    ============================================================ */
 const P = [
@@ -52,5 +52,26 @@ const P = [
  {id:"fog",g:2,e:"🌫️",n:"Foggy Snow",r:[
   ["FPS","50","25 în furtună"],["Shutter","Auto"],["ISO","Auto 100–800"],
   ["FOV","Wide","Ultra Wide pe selfie stick"],["White Balance","5000K–5500K"],
-  ["Stabilizare","RockSteady"],["EV / Filtru","EV -0.3 / 0","fără ND"]]}
+  ["Stabilizare","RockSteady"],["EV / Filtru","EV -0.3 / 0","fără ND"]]},
+ /* ---------- TIMELAPSE ---------- */
+ {id:"tl-sunset",g:3,e:"🌆",n:"Sunset / Oraș",r:[
+  ["Interval","3s"],["Durată","Infinity / 30–60 min"],["Rezoluție","4K"],["Shutter","Auto sau 1–3s"],
+  ["ISO","Auto 100–800"],["EV","0 la +0.3"],["FOV","Wide / Natural Wide"],["White Balance","Auto"],
+  ["Culoare","Normal"],["Format","Video"],["Stabilizare","Off / tripod"]]},
+ {id:"tl-clouds",g:3,e:"☁️",n:"Clouds / Cer",r:[
+  ["Interval","10–30s"],["Durată","30–60 min"],["Rezoluție","4K"],["Shutter","Auto sau 1–3s"],
+  ["ISO","Auto 100–800"],["EV","0 la -0.3"],["FOV","Wide"],["White Balance","Auto"],
+  ["Culoare","Normal"],["Format","Video"],["Stabilizare","Off / tripod"]]},
+ {id:"tl-crowds",g:3,e:"🚶",n:"Crowds / Stradă",r:[
+  ["Interval","0.5–1s"],["Durată","10–30 min"],["Rezoluție","4K"],["Shutter","Auto sau 1/30–1/60s"],
+  ["ISO","Auto 100–800"],["EV","-0.3 la 0"],["FOV","Wide"],["White Balance","Auto"],
+  ["Culoare","Normal"],["Format","Video"],["Stabilizare","Off / tripod"]]},
+ {id:"tl-waves",g:3,e:"🌊",n:"Waves / Apă",r:[
+  ["Interval","1–2s"],["Durată","10–30 min"],["Rezoluție","4K"],["Shutter","Auto sau 1/30–1/60s"],
+  ["ISO","Auto 100–800"],["EV","-0.3 la 0"],["FOV","Wide"],["White Balance","Auto"],
+  ["Culoare","Normal"],["Format","Video"],["Stabilizare","Off / tripod"]]},
+ {id:"tl-night",g:3,e:"🌌",n:"Night Sky / Noapte",r:[
+  ["Interval","10–30s"],["Durată","1–3 ore"],["Rezoluție","4K"],["Shutter","1–5s"],
+  ["ISO","Auto 100–1600"],["EV","0 la +0.3"],["FOV","Wide"],["White Balance","3500K–4500K"],
+  ["Culoare","Normal"],["Format","Video + RAW"],["Stabilizare","Off / tripod"]]}
 ];

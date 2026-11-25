@@ -1,7 +1,7 @@
 /* Service worker – Osmo Setări
    Când schimbi ceva (ex. presets.js), mărește VERSION: v1 → v2 → v3 ...
    Telefonul va descărca automat versiunea nouă la următoarea deschidere cu internet. */
-const VERSION = "v5";
+const VERSION = "v6";
 const CACHE = "osmo-setari-" + VERSION;
 const FILES = [
   "./",
