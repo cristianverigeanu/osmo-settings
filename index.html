@@ -16,7 +16,7 @@
 <style>
   :root{
     --bg:#0e1013;--card:#16191e;--card2:#1c2026;--line:#252a32;
-    --txt:#f3f4f6;--mut:#8d94a0;
+    --txt:#f3f4f6;--mut:#9ea5b0;--lbl:#c5cad2;
     --acc:#ff7a3d;--acc2:#ffb03d;--accbg:rgba(255,122,61,.12);
     --ok:#3ddc84;--okbg:rgba(61,220,132,.10);
     --r:18px;
@@ -66,7 +66,7 @@
   .info[hidden]{display:none}
 
   /* Sfat 120 fps pe pagina scenariului */
-  .f120{margin:4px 16px 14px;padding:11px 14px;border-radius:12px;background:var(--card2);border:1px solid var(--line);font-size:14.5px;font-weight:600;line-height:1.35}
+  .f120{margin:14px 16px 0;padding:11px 14px;border-radius:12px;background:var(--card2);border:1px solid var(--line);font-size:14.5px;font-weight:600;line-height:1.35}
   .f120 span{display:block;color:var(--mut);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px}
 
   /* ===== PAGINA SCENARIULUI ===== */
@@ -85,13 +85,10 @@
   .now.all .fill{background:var(--ok)}
   .now.all .c,.now.all .c b{color:var(--ok)}
 
-  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r)}
-  .card h2{font-size:19px;font-weight:800;padding:16px 16px 4px}
-  .card .d{display:block;color:var(--mut);font-size:14px;font-weight:500;padding:0 16px 12px}
-  .bar{display:flex;align-items:center;gap:12px;padding:10px 12px 12px 16px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-  .prog{flex:1}
-  .cnt{font-size:14px;color:var(--mut);margin-bottom:7px}
-  .cnt b{color:var(--txt);font-size:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+  .card .top{border-bottom:1px solid var(--line);padding-bottom:14px}
+  .card .d{display:block;color:var(--lbl);font-size:15px;font-weight:600;padding:14px 16px 0}
+  .foot{display:flex;justify-content:center;padding:12px 16px 14px}
   .track{height:8px;border-radius:8px;background:#262b33;overflow:hidden}
   .fill{height:100%;width:0;border-radius:8px;background:linear-gradient(90deg,var(--acc),var(--acc2));transition:width .45s cubic-bezier(.2,.9,.3,1),background .3s}
   .card.all .fill{background:var(--ok)}
@@ -104,11 +101,11 @@
   .chk{flex:0 0 28px;width:28px;height:28px;border-radius:50%;border:2px solid #3a404a;display:grid;place-items:center;transition:border-color .2s,background .2s}
   .chk svg{width:16px;height:16px}
   .chk path{fill:none;stroke:#0b1a11;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:20;stroke-dashoffset:20;transition:stroke-dashoffset .3s .08s ease-out}
-  .k{color:var(--mut);font-size:14px;flex:0 0 32%}
+  .k{color:var(--lbl);font-size:15px;font-weight:600;flex:0 0 34%}
   .v{flex:1;font-size:17px;font-weight:700;text-align:right;transition:color .25s}
   .vv{white-space:pre-line}
   .load-err{padding-top:24px}
-  .v small{display:block;font-size:13px;font-weight:400;color:var(--mut);margin-top:2px}
+  .v small{display:block;font-size:13.5px;font-weight:500;color:var(--mut);margin-top:2px}
   .row.done{background:var(--okbg)}
   .row.done .chk{background:var(--ok);border-color:var(--ok);animation:pop .35s cubic-bezier(.3,1.6,.5,1)}
   .row.done .chk path{stroke-dashoffset:0}
@@ -137,7 +134,6 @@
   .pt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .ar{color:var(--acc);font-size:22px;line-height:1;font-weight:400;margin-top:-2px}
   .dots{flex:0 0 auto;min-width:40px;text-align:center;font-size:12.5px;font-weight:700;color:var(--mut);font-variant-numeric:tabular-nums}
-  .hint{text-align:center;color:var(--mut);font-size:12.5px;margin-top:12px}
   #out{will-change:transform}
   #out.fromR{animation:in .28s cubic-bezier(.2,.9,.3,1)}
   #out.fromL{animation:inL .28s cubic-bezier(.2,.9,.3,1)}
@@ -219,7 +215,6 @@
     <div class="track"><div class="fill" id="nowF"></div></div>
   </div>
   <div class="card" id="out"></div>
-  <p class="hint">poți și să glisezi stânga / dreapta pentru alt scenariu</p>
   <button class="home-btn" id="homeBtn">‹ Alege alt scenariu</button>
 </section>
 

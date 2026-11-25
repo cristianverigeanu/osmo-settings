@@ -64,20 +64,15 @@ function build(p) {
       h("div", { class: "k" }, txt(k)),
       h("div", { class: "v" }, h("span", { class: "vv" }, txt(v)), s ? h("small", null, txt(s)) : null)));
 
-  const cnt = h("div", { class: "cnt", id: "cnt" });
-  const fill = h("div", { class: "fill", id: "fill" });
-  const rst = h("button", { class: "rst", id: "rst" }, "Resetează");
+  const rst = h("button", { class: "rst", id: "rst" }, "Resetează bifele");
   const ok = h("div", { class: "ok", id: "ok" }, "✅ Gata, camera e setată!");
 
-  out.replaceChildren(
-    h("h2", null, `${txt(p.e)} ${txt(p.n)}`),
-    h("span", { class: "d" }, txt(p.d)),
-    txt(p.f) ? h("div", { class: "f120" }, h("span", null, "Slow motion"), txt(p.f)) : null,
-    h("div", { class: "bar" },
-      h("div", { class: "prog" }, cnt, h("div", { class: "track" }, fill)),
-      rst),
-    ...rows,
-    ok);
+  /* Titlul și progresul sunt doar în bara de sus; în card rămân descrierea și sfatul 120 fps */
+  const top = (txt(p.d) || txt(p.f)) ? h("div", { class: "top" },
+    txt(p.d) ? h("span", { class: "d" }, txt(p.d)) : null,
+    txt(p.f) ? h("div", { class: "f120" }, h("span", null, "Slow motion"), txt(p.f)) : null) : null;
+
+  out.replaceChildren(...[top, ...rows, ok, h("div", { class: "foot" }, rst)].filter(Boolean));
 
   const saved = new Set(Array.isArray(DONE[p.id]) ? DONE[p.id] : []);
   rows.forEach((r, i) => r.classList.toggle("done", saved.has(p.r[i][0])));
@@ -94,8 +89,6 @@ function build(p) {
     saveDone();
     rows.forEach(r => r.setAttribute("aria-checked", r.classList.contains("done")));
     const n = keys.length, t = rows.length, pc = (n / t * 100) + "%";
-    cnt.replaceChildren(h("b", null, n), ` / ${t} setate`);
-    fill.style.width = pc;
     $("nowC").replaceChildren(h("b", null, n), `/${t}`);
     $("nowF").style.width = pc;
     const nx = rows.find(x => !x.classList.contains("done"));
