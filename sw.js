@@ -1,48 +1,114 @@
 /* Service worker – Osmo Setări
-   Când schimbi ceva (ex. presets.js), mărește VERSION: v1 → v2 → v3 ...
-   Telefonul va descărca automat versiunea nouă la următoarea deschidere cu internet. */
-const VERSION = "v6";
+
+   Ce face:
+   - salvează aplicația pe telefon, ca să meargă offline;
+   - o deschide instant din memorie și verifică în fundal dacă ai urcat ceva nou pe GitHub;
+   - dacă da, aplicația îți arată „Versiune nouă disponibilă”. Nu se mai reîncarcă singură.
+
+   VERSION: modific-o DOAR când adaugi, ștergi sau redenumești fișiere (lista FILES de mai jos)
+   sau când schimbi acest fișier sw.js. Pentru modificări în presets.js sau index.html NU mai e nevoie. */
+const VERSION = "v7";
 const CACHE = "osmo-setari-" + VERSION;
-const FILES = [
-  "./",
-  "./index.html",
-  "./presets.js",
-  "./manifest.json",
-  "./icons/icon-192.png",
-  "./icons/icon-512.png"
-];
+
+/* Fără acestea aplicația nu poate porni offline → trebuie să existe toate */
+const CORE = ["./", "./index.html", "./presets.js"];
+/* Utile, dar dacă una lipsește, aplicația tot se instalează */
+const EXTRA = ["./manifest.json", "./icons/icon-192.png", "./icons/icon-512.png"];
+
+/* Fișierele în care urmărim schimbări (ca să-ți arătăm „Versiune nouă”) */
+const WATCH = /(\/|\/index\.html|\/presets\.js)$/;
 
 self.addEventListener("install", e => {
   e.waitUntil(
-    caches.open(CACHE)
-      .then(c => c.addAll(FILES.map(f => new Request(f, { cache: "reload" }))))
-      .then(() => self.skipWaiting())
+    caches.open(CACHE).then(c =>
+      c.addAll(CORE.map(f => new Request(f, { cache: "reload" })))
+        .then(() => Promise.all(EXTRA.map(f => c.add(new Request(f, { cache: "reload" })).catch(() => {}))))
+    )
   );
+  /* Nu trece singur la versiunea nouă: așteaptă să apeși „Actualizează”
+     (prima instalare se activează oricum imediat). */
+});
+
+self.addEventListener("message", e => {
+  if (e.data && e.data.type === "SKIP_WAITING") self.skipWaiting();
 });
 
 self.addEventListener("activate", e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => k.startsWith("osmo-setari-") && k !== CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
 
-/* Răspunde instant din cache (merge offline) și, în fundal,
-   aduce versiunea nouă de pe internet dacă există. */
+/* Același fișier? Comparăm ETag / Last-Modified (GitHub Pages le trimite), altfel conținutul. */
+async function differs(oldRes, newRes) {
+  const tag = r => r.headers.get("etag") || r.headers.get("last-modified");
+  const a = tag(oldRes), b = tag(newRes);
+  if (a && b) return a !== b;
+  const [x, y] = await Promise.all([oldRes.clone().text(), newRes.clone().text()]);
+  return x !== y;
+}
+
+async function notify() {
+  /* mică pauză: la deschidere, fereastra aplicației trebuie să fie gata să primească mesajul */
+  await new Promise(r => setTimeout(r, 1500));
+  const list = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+  list.forEach(c => c.postMessage({ type: "CONTENT_UPDATED" }));
+}
+
+/* Aduce un fișier proaspăt de pe server, îl salvează și spune dacă s-a schimbat. */
+async function refresh(cache, key, request) {
+  const res = await fetch(request);
+  if (!res || !res.ok || res.type !== "basic") return { res, changed: false };
+  const old = await cache.match(key, { ignoreSearch: true });
+  const changed = !!old && await differs(old, res);
+  await cache.put(key, res.clone());
+  return { res, changed };
+}
+
+/* Răspunde instant din memorie (merge offline) și aduce în fundal versiunea de pe internet. */
 self.addEventListener("fetch", e => {
-  if (e.request.method !== "GET") return;
-  e.respondWith(
-    caches.open(CACHE).then(cache =>
-      cache.match(e.request, { ignoreSearch: true }).then(cached => {
-        const fresh = fetch(e.request).then(res => {
-          if (res && res.ok && new URL(e.request.url).origin === location.origin) {
-            cache.put(e.request, res.clone());
-          }
-          return res;
-        }).catch(() => cached || (e.request.mode === "navigate" ? cache.match("./index.html") : undefined));
-        return cached || fresh;
-      })
-    )
-  );
+  const req = e.request;
+  if (req.method !== "GET") return;
+  const url = new URL(req.url);
+  if (url.origin !== location.origin) return;
+
+  const nav = req.mode === "navigate";
+  /* cheia de cache = adresa fără „?…”, ca să existe o singură copie pe fișier */
+  const key = nav ? new URL("./", self.registration.scope).href : url.origin + url.pathname;
+  const watched = nav || WATCH.test(url.pathname);
+  /* fișierele urmărite se verifică mereu la server (altfel browserul poate da o copie veche de ~10 min) */
+  const fresh = watched ? new Request(url.origin + url.pathname, { cache: "no-cache", credentials: "same-origin" }) : req;
+
+  /* ține service worker-ul treaz până termină verificarea din fundal */
+  let finish;
+  e.waitUntil(new Promise(r => { finish = r; }));
+
+  e.respondWith((async () => {
+    const cache = await caches.open(CACHE);
+    const cached = await cache.match(key, { ignoreSearch: true });
+
+    const jobs = [refresh(cache, key, fresh)];
+    /* la fiecare deschidere a aplicației verificăm și presetările */
+    if (nav) {
+      const pk = new URL("./presets.js", self.registration.scope).href;
+      jobs.push(refresh(cache, pk, new Request(pk, { cache: "no-cache", credentials: "same-origin" })));
+    }
+    const background = Promise.all(jobs.map(j => j.catch(() => ({ changed: false }))))
+      .then(r => { if (r.some(x => x.changed)) return notify(); })
+      .finally(finish);
+
+    if (cached) return cached;
+    try {
+      const { res } = await jobs[0];
+      return res;
+    } catch (err) {
+      if (nav) {
+        const fallback = await cache.match("./index.html");
+        if (fallback) return fallback;
+      }
+      throw err;
+    }
+  })());
 });
