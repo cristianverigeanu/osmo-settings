@@ -7,13 +7,13 @@
 
    VERSION: modific-o DOAR când adaugi, ștergi sau redenumești fișiere (lista FILES de mai jos)
    sau când schimbi acest fișier sw.js. Pentru modificări în presets.js sau index.html NU mai e nevoie. */
-const VERSION = "v9";
+const VERSION = "v10";
 const CACHE = "osmo-setari-" + VERSION;
 
 /* Fără acestea aplicația nu poate porni offline → trebuie să existe toate */
 const CORE = ["./", "./index.html", "./boot.js", "./app.js", "./presets.js"];
 /* Utile, dar dacă una lipsește, aplicația tot se instalează */
-const EXTRA = ["./manifest.json", "./icons/icon-192.png", "./icons/icon-512.png"];
+const EXTRA = ["./manifest.json", "./icons/icon-192.png", "./icons/icon-512.png", "./splash.jpg"];
 
 /* Fișierele în care urmărim schimbări (ca să-ți arătăm „Versiune nouă”) */
 const WATCH = /(\/|\/index\.html|\/boot\.js|\/app\.js|\/presets\.js)$/;

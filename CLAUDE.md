@@ -19,6 +19,10 @@ Răspunde în română, scurt.
    - `const VERSION = "vN";` → `"vN+1"` (ex. `v8` → `v9`), la orice commit care schimbă fișiere ale aplicației.
    - Regula aceasta are prioritate față de comentariul vechi din `sw.js` care spune că nu e nevoie pentru `presets.js`/`index.html`.
 
+## Tutorial
+
+După fiecare pas făcut, actualizează documentul HOW TO: https://claude.ai/artifact/UfJXR9THqjs8P7zbf4beKE (rând nou în „Jurnal”, cel mai nou sus; secțiune „Pas N” dacă e un procedeu nou).
+
 ## Verificare
 
 `.github/workflows/verificare.yml` rulează la fiecare push: `node --check` pe JS, validează `presets.js` (fără HTML/cod, id-uri unice) și caută script inline / `on…=` în `index.html`. Înainte de commit poți rula local:

@@ -213,6 +213,17 @@ addEventListener("keydown", e => {
 addEventListener("hashchange", route);
 route();
 
+/* Ecranul de pornire stă minim 1,5 secunde de la deschidere, apoi dispare */
+(() => {
+  const sp = $("splash");
+  if (!sp) return;
+  setTimeout(() => {
+    sp.classList.add("gone");
+    sp.addEventListener("transitionend", () => sp.remove(), { once: true });
+    setTimeout(() => sp.remove(), 800);
+  }, Math.max(0, 1500 - performance.now()));
+})();
+
 /* ---- PWA: offline + actualizare fără refresh forțat ---- */
 if ("serviceWorker" in navigator) {
   const sw = navigator.serviceWorker;
