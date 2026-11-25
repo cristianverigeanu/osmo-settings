@@ -1,5 +1,5 @@
 /* ============================================================
-   PRESETĂRI – aici adaugi / modifici scenariile.
+   PRESETĂRI – aici adaugi / modifici scenariile..
    Format pentru un scenariu nou:
    {id:"unic", g:1 sau 2, e:"emoji", n:"Nume", d:"descriere (opțional)", r:[
      ["Setare","Valoare","notă mică (opțional)"],
