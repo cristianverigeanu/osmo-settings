@@ -320,25 +320,20 @@ route();
 /* ---- PWA: offline + actualizare fără refresh forțat ---- */
 if ("serviceWorker" in navigator) {
   const sw = navigator.serviceWorker;
-  let want = false;
   const bump = () => { try { localStorage.setItem("osmo-r", Date.now()); } catch (x) {} };
   let act = null;
   const ask = fn => { act = fn; $("upd").hidden = false; };
   on($("updBtn"), "click", () => { if (act) act(); });
   on($("updX"), "click", () => { $("upd").hidden = true; });
-  /* Pagina se reîncarcă DOAR după ce ai apăsat „Actualizează” */
-  sw.addEventListener("controllerchange", () => { if (want) location.reload(); });
+  /* Pagina se reîncarcă DOAR după ce ai apăsat „Actualizează”.
+     Un sw.js nou se activează singur (vezi sw.js), deci nu mai așteptăm după el aici. */
   /* Fișierele de pe GitHub s-au schimbat → noul conținut e deja salvat, trebuie doar reîncărcat */
   sw.addEventListener("message", e => {
     if (e.data && e.data.type === "CONTENT_UPDATED") ask(() => { bump(); location.reload(); });
   });
   const register = () => sw.register("sw.js").then(reg => {
-    const waiting = w => ask(() => { want = true; bump(); w.postMessage({ type: "SKIP_WAITING" }); });
-    if (reg.waiting && sw.controller) waiting(reg.waiting);
-    reg.addEventListener("updatefound", () => {
-      const w = reg.installing;
-      w && w.addEventListener("statechange", () => { if (w.state === "installed" && sw.controller) waiting(w); });
-    });
+    /* un sw.js vechi rămas în așteptare (de la versiunile de dinainte) → îl pornim acum */
+    if (reg.waiting) reg.waiting.postMessage({ type: "SKIP_WAITING" });
     reg.update().catch(() => {});
     /* Verifică actualizări și când revii în aplicație din fundal */
     document.addEventListener("visibilitychange", () => {

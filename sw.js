@@ -4,10 +4,11 @@
    - salvează aplicația pe telefon, ca să meargă offline;
    - o deschide instant din memorie și verifică în fundal dacă ai urcat ceva nou pe GitHub;
    - dacă da, aplicația îți arată „Versiune nouă disponibilă”. Nu se mai reîncarcă singură.
+   - o versiune nouă a acestui fișier se activează singură (fără așteptare), deci un simplu
+     refresh aduce deja versiunea nouă; bannerul nu mai rămâne agățat.
 
-   VERSION: modific-o DOAR când adaugi, ștergi sau redenumești fișiere (lista FILES de mai jos)
-   sau când schimbi acest fișier sw.js. Pentru modificări în presets.js sau index.html NU mai e nevoie. */
-const VERSION = "v14";
+   VERSION: crește-o la fiecare commit care schimbă fișiere ale aplicației (vezi CLAUDE.md, regula 3). */
+const VERSION = "v15";
 const CACHE = "osmo-setari-" + VERSION;
 
 /* Fără acestea aplicația nu poate porni offline → trebuie să existe toate */
@@ -25,8 +26,9 @@ self.addEventListener("install", e => {
         .then(() => Promise.all(EXTRA.map(f => c.add(new Request(f, { cache: "reload" })).catch(() => {}))))
     )
   );
-  /* Nu trece singur la versiunea nouă: așteaptă să apeși „Actualizează”
-     (prima instalare se activează oricum imediat). */
+  /* Trece imediat la versiunea nouă. Pagina deschisă rămâne cum e; ce e nou apare la
+     următoarea încărcare (refresh sau „Actualizează”). */
+  self.skipWaiting();
 });
 
 self.addEventListener("message", e => {
