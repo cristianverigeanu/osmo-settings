@@ -1,0 +1,71 @@
+# Verificare automată la fiecare modificare urcată pe GitHub.
+# Dacă ceva e greșit (HTML sau cod în presetări, fișier lipsă, eroare de scriere în JS),
+# commit-ul primește un X roșu, iar GitHub îți trimite un email cu motivul.
+name: Verificare
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verificare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fișierele JavaScript nu au erori de scriere
+        run: for f in boot.js app.js presets.js sw.js; do node --check "$f"; done
+
+      - name: Presetările sunt corecte și nu conțin HTML sau cod
+        run: |
+          node <<'EOF'
+          const fs = require("fs"), vm = require("vm");
+          const ctx = {};
+          vm.runInNewContext(fs.readFileSync("presets.js", "utf8") + ";this.__P = P;", ctx);
+          const P = ctx.__P, err = [];
+          if (!Array.isArray(P) || !P.length) err.push("P trebuie să fie o listă cu scenarii");
+          const ids = new Set();
+          const bad = /[<>]|javascript:|\bon\w+\s*=/i;
+          const str = (v, where) => {
+            if (typeof v !== "string") err.push(`${where}: trebuie să fie text`);
+            else if (bad.test(v)) err.push(`${where}: conține HTML sau cod → "${v}"`);
+          };
+          (P || []).forEach((p, i) => {
+            const w = `scenariul ${i + 1} (${p && p.id})`;
+            if (!p || typeof p.id !== "string" || !/^[a-z0-9-]+$/.test(p.id)) err.push(`${w}: id invalid (doar litere mici, cifre, -)`);
+            else if (ids.has(p.id)) err.push(`${w}: id duplicat`); else ids.add(p.id);
+            if (![1, 2, 3].includes(p.g)) err.push(`${w}: g trebuie să fie 1, 2 sau 3`);
+            str(p.e, `${w} emoji`); str(p.n, `${w} nume`);
+            if (p.d !== undefined) str(p.d, `${w} descriere`);
+            if (!Array.isArray(p.r) || !p.r.length) { err.push(`${w}: lipsesc setările (r)`); return; }
+            const keys = new Set();
+            p.r.forEach((row, j) => {
+              const wr = `${w}, rândul ${j + 1}`;
+              if (!Array.isArray(row) || row.length < 2 || row.length > 3) { err.push(`${wr}: trebuie [setare, valoare, notă opțională]`); return; }
+              row.forEach((v, k) => str(v, `${wr}, câmpul ${k + 1}`));
+              if (keys.has(row[0])) err.push(`${wr}: setarea „${row[0]}” apare de două ori`); keys.add(row[0]);
+            });
+          });
+          if (err.length) { console.error("Probleme în presets.js:\n- " + err.join("\n- ")); process.exit(1); }
+          console.log(`OK: ${P.length} scenarii verificate`);
+          EOF
+
+      - name: Pagina și service worker-ul sunt în regulă
+        run: |
+          node <<'EOF'
+          const fs = require("fs"), err = [];
+          const html = fs.readFileSync("index.html", "utf8");
+          if (/<script(?![^>]*\bsrc=)[^>]*>/i.test(html)) err.push("index.html: cod JavaScript scris direct în pagină (mută-l în app.js; Content Security Policy îl blochează)");
+          if (/\son[a-z]+\s*=/i.test(html)) err.push("index.html: atribute onclick=/onload=… (sunt blocate de Content Security Policy)");
+          if (!html.includes("Content-Security-Policy")) err.push("index.html: lipsește Content-Security-Policy");
+          const sw = fs.readFileSync("sw.js", "utf8");
+          const files = [...sw.matchAll(/"\.\/([^"]*)"/g)].map(m => m[1]).filter(f => f && !f.endsWith("/"));
+          for (const f of new Set(files)) if (!fs.existsSync(f)) err.push(`sw.js cere fișierul „${f}”, dar nu există`);
+          JSON.parse(fs.readFileSync("manifest.json", "utf8"));
+          if (err.length) { console.error("Probleme:\n- " + err.join("\n- ")); process.exit(1); }
+          console.log("OK: index.html, sw.js, manifest.json");
+          EOF
