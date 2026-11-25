@@ -5,6 +5,7 @@
 "use strict";
 
 const $ = id => document.getElementById(id);
+const on = (el, type, fn, opt) => el.addEventListener(type, fn, opt);
 const out = $("out");
 const buzz = ms => { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} };
 
@@ -49,6 +50,31 @@ try {
   if (d && typeof d === "object" && !Array.isArray(d)) DONE = d;
 } catch (e) {}
 const saveDone = () => { try { localStorage.setItem(SKEY, JSON.stringify(DONE)); } catch (e) {} };
+
+/* Mesaj jos cu „Anulează” (5 secunde) după o resetare */
+let toastT = 0, undoFn = null;
+function toast(msg, undo) {
+  $("toastM").textContent = msg;
+  undoFn = undo;
+  $("toast").hidden = false;
+  clearTimeout(toastT);
+  toastT = setTimeout(() => { $("toast").hidden = true; undoFn = null; }, 5000);
+}
+on($("toastU"), "click", () => {
+  clearTimeout(toastT);
+  $("toast").hidden = true;
+  if (undoFn) { const f = undoFn; undoFn = null; f(); buzz(10); }
+});
+
+/* Șterge bifele (ale unui scenariu sau pe toate) și oferă „Anulează” */
+function resetDone(id, msg) {
+  const before = JSON.stringify(DONE);
+  if (id) delete DONE[id]; else DONE = {};
+  saveDone();
+  refresh();
+  buzz(20);
+  toast(msg, () => { DONE = JSON.parse(before); saveDone(); refresh(); });
+}
 
 const short = p => txt(p.n).replace("Point & Shoot ", "");
 
@@ -97,20 +123,39 @@ function build(p) {
     $("now").classList.toggle("all", n === t);
     return n;
   };
-  rows.forEach(r => r.onkeydown = e => {
+  rows.forEach(r => on(r, "keydown", e => {
     if (e.key === " " || e.key === "Enter") { e.preventDefault(); r.click(); }
-  });
-  rows.forEach(r => r.onclick = () => {
+  }));
+  rows.forEach(r => on(r, "click", () => {
     r.classList.toggle("done");
     const n = upd();
     if (n === rows.length) { buzz([30, 60, 30]); ok.scrollIntoView({ behavior: "smooth", block: "center" }); return; }
     buzz(12);
     const nx = rows.find(x => !x.classList.contains("done"));
     if (r.classList.contains("done") && nx) nx.scrollIntoView({ behavior: "smooth", block: "center" });
+  }));
+  on(rst, "click", () => {
+    if (!DONE[p.id]) return;
+    resetDone(p.id, "Bifele scenariului au fost resetate");
   });
-  rst.onclick = () => { rows.forEach(r => r.classList.remove("done")); upd(); buzz(20); };
   upd();
 }
+
+/* Redesenează pagina curentă după o resetare / anulare, fără să sară sus */
+function refresh() {
+  const p = LIST.find(x => x.id === cur);
+  if (p && $("scen").classList.contains("on")) build(p);
+  else cur = null; /* scenariul se reconstruiește la următoarea deschidere */
+  homeReset();
+}
+
+/* Butonul „Resetează toate bifele” apare doar dacă ai ceva bifat */
+function homeReset() {
+  const n = LIST.filter(p => Array.isArray(DONE[p.id]) && DONE[p.id].length).length;
+  $("allRst").hidden = !n;
+  $("allRst").textContent = n === 1 ? "Resetează toate bifele (1 scenariu)" : `Resetează toate bifele (${n} scenarii)`;
+}
+on($("allRst"), "click", () => resetDone(null, "Toate bifele au fost resetate"));
 
 /* Navigare între pagini (merge și butonul Înapoi al telefonului) */
 let cur = null, pushed = false;
@@ -120,7 +165,7 @@ LIST.forEach(p => {
   const b = h("button", { class: "tab", "data-id": p.id },
     h("span", { class: "e" }, txt(p.e)),
     h("span", { class: "t" }, short(p)));
-  b.onclick = () => { buzz(8); pushed = true; location.hash = p.id; };
+  on(b, "click", () => { buzz(8); pushed = true; location.hash = p.id; });
   ($("t" + (p.g || 1)) || $("t1")).appendChild(b);
 });
 
@@ -147,18 +192,36 @@ function route() {
     try { last = localStorage.getItem("osmo") || ""; } catch (e) {}
     document.querySelectorAll(".tab").forEach(b => b.classList.toggle("last", b.dataset.id === last));
     pushed = false;
+    homeReset();
     $("home").classList.add("on");
   }
   scrollTo(0, 0);
+  awake();
 }
 
+/* Ecranul rămâne aprins cât e deschis un scenariu (dacă telefonul permite) */
+let lock = null;
+async function awake() {
+  const want = $("scen").classList.contains("on") && document.visibilityState === "visible";
+  try {
+    if (want && !lock && navigator.wakeLock) {
+      lock = await navigator.wakeLock.request("screen");
+      on(lock, "release", () => { lock = null; });
+    } else if (!want && lock) {
+      await lock.release(); lock = null;
+    }
+  } catch (e) { lock = null; }
+}
+on(document, "visibilitychange", awake);
+
 /* Bara de sus și butonul de jos te duc pe pagina principală */
-$("fpsTab").onclick = () => { buzz(8); pushed = true; location.hash = "120fps"; };
-$("nowBtn").onclick = $("homeBtn").onclick = $("fpsBack").onclick = $("fpsHome").onclick = () => {
+on($("fpsTab"), "click", () => { buzz(8); pushed = true; location.hash = "120fps"; });
+const goHome = () => {
   buzz(8);
   if (pushed) history.back();
   else { history.replaceState(null, "", location.pathname + location.search); route(); }
 };
+["nowBtn", "homeBtn", "fpsBack", "fpsHome"].forEach(id => on($(id), "click", goHome));
 
 /* Swipe stânga/dreapta = scenariul următor/anterior */
 function go(dir) {
@@ -196,8 +259,8 @@ function go(dir) {
     mode = "";
   }, { passive: true });
 })();
-$("prevBtn").onclick = () => go(-1);
-$("nextBtn").onclick = () => go(1);
+on($("prevBtn"), "click", () => go(-1));
+on($("nextBtn"), "click", () => go(1));
 addEventListener("keydown", e => {
   if (!$("scen").classList.contains("on")) return;
   if (e.key === "ArrowRight") go(1);
@@ -222,8 +285,10 @@ if ("serviceWorker" in navigator) {
   const sw = navigator.serviceWorker;
   let want = false;
   const bump = () => { try { localStorage.setItem("osmo-r", Date.now()); } catch (x) {} };
-  const ask = act => { $("upd").hidden = false; $("updBtn").onclick = act; };
-  $("updX").onclick = () => { $("upd").hidden = true; };
+  let act = null;
+  const ask = fn => { act = fn; $("upd").hidden = false; };
+  on($("updBtn"), "click", () => { if (act) act(); });
+  on($("updX"), "click", () => { $("upd").hidden = true; });
   /* Pagina se reîncarcă DOAR după ce ai apăsat „Actualizează” */
   sw.addEventListener("controllerchange", () => { if (want) location.reload(); });
   /* Fișierele de pe GitHub s-au schimbat → noul conținut e deja salvat, trebuie doar reîncărcat */
