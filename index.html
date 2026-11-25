@@ -2,6 +2,9 @@
 <html lang="ro">
 <head>
 <meta charset="utf-8">
+<!-- Securitate: rulează doar cod de pe acest site; nicio conexiune spre alte site-uri -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Osmo Action 4 – Setări rapide</title>
 <meta name="description" content="Setări recomandate pe scenarii pentru DJI Osmo Action 4, cu bifare pas cu pas. Merge și offline.">
@@ -97,6 +100,8 @@
   .chk path{fill:none;stroke:#0b1a11;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:20;stroke-dashoffset:20;transition:stroke-dashoffset .3s .08s ease-out}
   .k{color:var(--mut);font-size:14px;flex:0 0 32%}
   .v{flex:1;font-size:17px;font-weight:700;text-align:right;transition:color .25s}
+  .vv{white-space:pre-line}
+  .load-err{padding-top:24px}
   .v small{display:block;font-size:13px;font-weight:400;color:var(--mut);margin-top:2px}
   .row.done{background:var(--okbg)}
   .row.done .chk{background:var(--ok);border-color:var(--ok);animation:pop .35s cubic-bezier(.3,1.6,.5,1)}
@@ -209,162 +214,7 @@
 
 <div class="upd" id="upd" role="status" hidden><span>Versiune nouă disponibilă</span><button id="updBtn">Actualizează</button><button class="x" id="updX" aria-label="Mai târziu">✕</button></div>
 
-<!-- Presetările sunt în presets.js (acolo le modifici) -->
-<script>
-const $=id=>document.getElementById(id);
-
-/* presets.js se încarcă aici. Marcajul „r” se schimbă doar când apeși „Actualizează”,
-   ca telefonul să nu-ți arate din memorie presetările vechi. */
-(()=>{let r="";try{r=localStorage.getItem("osmo-r")||""}catch(e){}
-  const sc=document.createElement("script");
-  sc.src="presets.js"+(r?"?r="+encodeURIComponent(r):"");
-  sc.onload=start;
-  sc.onerror=()=>{document.body.insertAdjacentHTML("afterbegin",'<p class="sub" style="padding-top:24px">Nu s-au putut încărca presetările. Deschide aplicația o dată cu internet.</p>')};
-  document.head.appendChild(sc);})();
-
-function start(){
-const out=$("out");
-const CHK='<span class="chk"><svg viewBox="0 0 24 24"><path d="M6 12.5l4 4 8-9"/></svg></span>';
-const buzz=ms=>{try{navigator.vibrate&&navigator.vibrate(ms)}catch(e){}};
-
-/* Numele categoriilor (apar sus, deasupra scenariului ales) */
-const GRUPE={1:"Point & Shoot",2:"Scenarii speciale",3:"Timelapse"};
-
-/* Bifele se salvează pe telefon (rămân și după închiderea aplicației).
-   Se țin minte după numele setării, ca să nu se încurce dacă reordonezi rândurile. */
-const SKEY="osmo-done";
-let DONE={};
-try{const d=JSON.parse(localStorage.getItem(SKEY));if(d&&typeof d==="object"&&!Array.isArray(d))DONE=d;}catch(e){}
-const saveDone=()=>{try{localStorage.setItem(SKEY,JSON.stringify(DONE))}catch(e){}};
-
-/* Construiește scenariul pe pagina lui */
-function build(p){
-  $("nowE").textContent=p.e;
-  $("nowN").textContent=p.n;
-  $("nowG").textContent=GRUPE[p.g]||"";
-  out.innerHTML=`<h2>${p.e} ${p.n}</h2><span class="d">${p.d||""}</span>`+
-    `<div class="bar"><div class="prog"><div class="cnt" id="cnt"></div><div class="track"><div class="fill" id="fill"></div></div></div><button class="rst" id="rst">Resetează</button></div>`+
-    p.r.map(([k,v,s],i)=>`<div class="row" data-i="${i}" role="checkbox" aria-checked="false" tabindex="0">${CHK}<div class="k">${k}</div><div class="v">${v}${s?`<small>${s}</small>`:""}</div></div>`).join("")+
-    `<div class="ok" id="ok">✅ Gata, camera e setată!</div>`;
-  const rows=[...out.querySelectorAll(".row")];
-  const saved=new Set(Array.isArray(DONE[p.id])?DONE[p.id]:[]);
-  rows.forEach((r,i)=>r.classList.toggle("done",saved.has(p.r[i][0])));
-  const ix=P.findIndex(x=>x.id===p.id),pp=P[(ix-1+P.length)%P.length],nn=P[(ix+1)%P.length];
-  const sh=x=>`${x.e} ${x.n.replace("Point & Shoot ","")}`;
-  $("prevT").textContent=sh(pp);$("nextT").textContent=sh(nn);
-  $("dots").textContent=`${ix+1}/${P.length}`;
-  const upd=()=>{
-    const keys=p.r.filter((x,i)=>rows[i].classList.contains("done")).map(x=>x[0]);
-    if(keys.length)DONE[p.id]=keys;else delete DONE[p.id];
-    saveDone();
-    rows.forEach(r=>r.setAttribute("aria-checked",r.classList.contains("done")));
-    const n=rows.filter(r=>r.classList.contains("done")).length,t=rows.length,pc=(n/t*100)+"%";
-    $("cnt").innerHTML=`<b>${n}</b> / ${t} setate`;$("fill").style.width=pc;
-    $("nowC").innerHTML=`<b>${n}</b>/${t}`;$("nowF").style.width=pc;
-    const nx=rows.find(x=>!x.classList.contains("done"));
-    rows.forEach(r=>r.classList.toggle("next",r===nx));
-    out.classList.toggle("all",n===t);$("now").classList.toggle("all",n===t);
-    return n;};
-  rows.forEach(r=>r.onkeydown=e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();r.click();}});
-  rows.forEach(r=>r.onclick=()=>{r.classList.toggle("done");
-    const n=upd();
-    if(n===rows.length){buzz([30,60,30]);$("ok").scrollIntoView({behavior:"smooth",block:"center"});return;}
-    buzz(12);
-    const nx=rows.find(x=>!x.classList.contains("done"));
-    if(r.classList.contains("done")&&nx)nx.scrollIntoView({behavior:"smooth",block:"center"});});
-  $("rst").onclick=()=>{rows.forEach(r=>r.classList.remove("done"));upd();buzz(20);};
-  upd();
-}
-
-/* Iconițele de pe pagina principală */
-P.forEach(p=>{
-  const b=document.createElement("button");
-  b.className="tab";b.dataset.id=p.id;
-  b.innerHTML=`<span class="e">${p.e}</span><span class="t">${p.n.replace("Point & Shoot ","")}</span>`;
-  b.onclick=()=>{buzz(8);pushed=true;location.hash=p.id};
-  $("t"+(p.g||1)).appendChild(b);
-});
-
-/* Navigare între pagini (merge și butonul Înapoi al telefonului) */
-let cur=null,pushed=false;
-function route(){
-  const id=location.hash.slice(1);
-  const p=P.find(x=>x.id===id);
-  document.querySelectorAll(".page").forEach(s=>s.classList.remove("on"));
-  if(id==="120fps"){
-    $("fps").classList.add("on");
-  }else if(p){
-    if(cur!==p.id){build(p);cur=p.id;}
-    try{localStorage.setItem("osmo",p.id)}catch(e){}
-    $("scen").classList.add("on");
-  }else{
-    let last="";try{last=localStorage.getItem("osmo")||""}catch(e){}
-    document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("last",b.dataset.id===last));
-    pushed=false;
-    $("home").classList.add("on");
-  }
-  scrollTo(0,0);
-}
-/* Bara de sus și butonul de jos te duc pe pagina principală */
-$("fpsTab").onclick=()=>{buzz(8);pushed=true;location.hash="120fps"};
-$("nowBtn").onclick=$("homeBtn").onclick=$("fpsBack").onclick=$("fpsHome").onclick=()=>{buzz(8);
-  if(pushed)history.back();
-  else{history.replaceState(null,"",location.pathname+location.search);route();}};
-
-/* Swipe stânga/dreapta = scenariul următor/anterior */
-function go(dir){
-  const i=P.findIndex(x=>x.id===cur);
-  const n=P[(i+dir+P.length)%P.length];
-  history.replaceState(null,"","#"+n.id);
-  route();
-  out.classList.remove("fromR","fromL");void out.offsetWidth;
-  out.classList.add(dir>0?"fromR":"fromL");
-  buzz(10);
-}
-(()=>{let x0=0,y0=0,dx=0,mode="";const sc=$("scen");
-  sc.addEventListener("touchstart",e=>{const t=e.touches[0];
-    if(t.clientX<24||t.clientX>innerWidth-24){mode="x-ignore";return;}
-    x0=t.clientX;y0=t.clientY;dx=0;mode="";},{passive:true});
-  sc.addEventListener("touchmove",e=>{if(mode==="x-ignore"||mode==="y")return;
-    const t=e.touches[0];dx=t.clientX-x0;const dy=t.clientY-y0;
-    if(!mode){if(Math.abs(dx)<10&&Math.abs(dy)<10)return;mode=Math.abs(dx)>Math.abs(dy)?"x":"y";}
-    if(mode==="x"){out.style.transition="none";out.style.transform=`translateX(${dx*.4}px)`;out.style.opacity=1-Math.min(Math.abs(dx)/600,.4);}
-  },{passive:true});
-  sc.addEventListener("touchend",()=>{if(mode==="x"){
-      out.style.transition="transform .2s,opacity .2s";out.style.transform="";out.style.opacity="";
-      if(Math.abs(dx)>70)go(dx<0?1:-1);}
-    mode="";},{passive:true});
-})();
-$("prevBtn").onclick=()=>go(-1);
-$("nextBtn").onclick=()=>go(1);
-addEventListener("keydown",e=>{if(!$("scen").classList.contains("on"))return;
-  if(e.key==="ArrowRight")go(1);if(e.key==="ArrowLeft")go(-1);});
-addEventListener("hashchange",route);
-route();
-}
-
-/* ---- PWA: offline + actualizare fără refresh forțat ---- */
-if("serviceWorker" in navigator){
-  const sw=navigator.serviceWorker;
-  let want=false;
-  const ask=act=>{$("upd").hidden=false;$("updBtn").onclick=act;};
-  $("updX").onclick=()=>{$("upd").hidden=true;};
-  /* Pagina se reîncarcă DOAR după ce ai apăsat „Actualizează” */
-  sw.addEventListener("controllerchange",()=>{if(want)location.reload();});
-  /* Fișierele de pe GitHub s-au schimbat (ex. presets.js) → noul conținut e deja salvat, trebuie doar reîncărcat */
-  sw.addEventListener("message",e=>{if(e.data&&e.data.type==="CONTENT_UPDATED")ask(()=>{try{localStorage.setItem("osmo-r",Date.now())}catch(x){}location.reload();});});
-  addEventListener("load",()=>{
-    sw.register("sw.js").then(reg=>{
-      const waiting=w=>ask(()=>{want=true;try{localStorage.setItem("osmo-r",Date.now())}catch(x){}w.postMessage({type:"SKIP_WAITING"});});
-      if(reg.waiting&&sw.controller)waiting(reg.waiting);
-      reg.addEventListener("updatefound",()=>{const w=reg.installing;
-        w&&w.addEventListener("statechange",()=>{if(w.state==="installed"&&sw.controller)waiting(w);});});
-      reg.update().catch(()=>{});
-      /* Verifică actualizări și când revii în aplicație din fundal */
-      document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")reg.update().catch(()=>{});});
-    }).catch(()=>{});
-  });
-}
-</script>
+<!-- Presetările sunt în presets.js, logica în app.js -->
+<script src="boot.js"></script>
 </body>
 </html>

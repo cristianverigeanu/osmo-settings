@@ -7,16 +7,16 @@
 
    VERSION: modific-o DOAR când adaugi, ștergi sau redenumești fișiere (lista FILES de mai jos)
    sau când schimbi acest fișier sw.js. Pentru modificări în presets.js sau index.html NU mai e nevoie. */
-const VERSION = "v7";
+const VERSION = "v8";
 const CACHE = "osmo-setari-" + VERSION;
 
 /* Fără acestea aplicația nu poate porni offline → trebuie să existe toate */
-const CORE = ["./", "./index.html", "./presets.js"];
+const CORE = ["./", "./index.html", "./boot.js", "./app.js", "./presets.js"];
 /* Utile, dar dacă una lipsește, aplicația tot se instalează */
 const EXTRA = ["./manifest.json", "./icons/icon-192.png", "./icons/icon-512.png"];
 
 /* Fișierele în care urmărim schimbări (ca să-ți arătăm „Versiune nouă”) */
-const WATCH = /(\/|\/index\.html|\/presets\.js)$/;
+const WATCH = /(\/|\/index\.html|\/boot\.js|\/app\.js|\/presets\.js)$/;
 
 self.addEventListener("install", e => {
   e.waitUntil(
@@ -90,10 +90,12 @@ self.addEventListener("fetch", e => {
     const cached = await cache.match(key, { ignoreSearch: true });
 
     const jobs = [refresh(cache, key, fresh)];
-    /* la fiecare deschidere a aplicației verificăm și presetările */
+    /* la fiecare deschidere a aplicației verificăm și presetările + codul aplicației */
     if (nav) {
-      const pk = new URL("./presets.js", self.registration.scope).href;
-      jobs.push(refresh(cache, pk, new Request(pk, { cache: "no-cache", credentials: "same-origin" })));
+      for (const f of ["./presets.js", "./app.js", "./boot.js"]) {
+        const fk = new URL(f, self.registration.scope).href;
+        jobs.push(refresh(cache, fk, new Request(fk, { cache: "no-cache", credentials: "same-origin" })));
+      }
     }
     const background = Promise.all(jobs.map(j => j.catch(() => ({ changed: false }))))
       .then(r => { if (r.some(x => x.changed)) return notify(); })
