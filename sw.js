@@ -7,7 +7,7 @@
 
    VERSION: modific-o DOAR când adaugi, ștergi sau redenumești fișiere (lista FILES de mai jos)
    sau când schimbi acest fișier sw.js. Pentru modificări în presets.js sau index.html NU mai e nevoie. */
-const VERSION = "v12";
+const VERSION = "v13";
 const CACHE = "osmo-setari-" + VERSION;
 
 /* Fără acestea aplicația nu poate porni offline → trebuie să existe toate */

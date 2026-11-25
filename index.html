@@ -43,13 +43,30 @@
   .sub{color:var(--mut);font-size:14px;margin:0 2px 20px}
   .group{color:var(--mut);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin:4px 4px 10px}
 
-  .tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px}
-  .tab{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;min-height:104px;
+  /* Grilă de 12 coloane: app.js dă fiecărei iconițe lățimea, ca rândurile să fie mereu pline */
+  .tabs{display:grid;grid-template-columns:repeat(12,1fr);gap:10px;margin-bottom:20px}
+  .tab{grid-column:span 4}
+  .tab{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:7px;min-height:96px;
     background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:14px 6px 12px;text-align:center;cursor:pointer;
     transition:transform .12s,border-color .2s,background .2s}
   .tab:active{transform:scale(.95);background:var(--card2)}
-  .tab .e{display:grid;place-items:center;width:44px;height:44px;border-radius:13px;background:#22262e;font-size:24px}
+  .tab .e{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:#22262e;font-size:22px}
   .tab .t{font-size:13.5px;font-weight:700;line-height:1.2}
+  /* Progresul bifelor pe iconiță */
+  .tab .p{font-size:12px;font-weight:800;color:var(--acc);font-variant-numeric:tabular-nums;margin-top:-2px}
+  .tab .p:empty{display:none}
+  .tab.full .p{color:var(--ok)}
+  .tab.full{border-color:rgba(61,220,132,.45)}
+
+  /* Rând subțire „Când folosești 120 fps” */
+  .tip{display:flex;align-items:center;gap:12px;width:100%;min-height:60px;padding:8px 14px 8px 8px;border-radius:16px;
+    background:var(--card);border:1.5px solid var(--line);text-align:left;cursor:pointer;transition:transform .12s,background .2s}
+  .tip:active{transform:scale(.98);background:var(--card2)}
+  .tip .e{display:grid;place-items:center;flex:0 0 40px;height:40px;border-radius:12px;background:#22262e;font-size:22px}
+  .tip .nm{flex:1;min-width:0}
+  .tip .lb{display:block;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
+  .tip .tt{display:block;font-size:15px;font-weight:700}
+  .tip .ar{color:var(--acc);font-size:24px;line-height:1}
   .tab.last{border-color:rgba(255,122,61,.55)}
   .tab.last .e{background:var(--accbg)}
   .tab.last::after{content:"ultimul";position:absolute;top:-8px;left:50%;transform:translateX(-50%);
@@ -197,10 +214,7 @@
   <div class="group">Timelapse</div>
   <div class="tabs" id="t3"></div>
 
-  <div class="group">Sfaturi</div>
-  <div class="tabs" id="t4">
-    <button class="tab" id="fpsTab"><span class="e">🎞️</span><span class="t">Când folosești 120 fps</span></button>
-  </div>
+  <button class="tip" id="fpsTab"><span class="e">🎞️</span><span class="nm"><span class="lb">Sfat</span><span class="tt">Când folosești 120 fps</span></span><span class="ar">›</span></button>
   <button class="home-btn all-rst" id="allRst" hidden>Resetează toate bifele</button>
 </section>
 

@@ -151,6 +151,15 @@ function refresh() {
 
 /* Butonul „Resetează toate bifele” apare doar dacă ai ceva bifat */
 function homeReset() {
+  /* progresul pe fiecare iconiță, ex. „3/9” (verde când e complet) */
+  document.querySelectorAll(".tab[data-id]").forEach(b => {
+    const p = LIST.find(x => x.id === b.dataset.id);
+    const keys = new Set(p.r.map(x => x[0]));
+    const k = (Array.isArray(DONE[p.id]) ? DONE[p.id] : []).filter(x => keys.has(x)).length;
+    const t = p.r.length;
+    b.querySelector(".p").textContent = k ? (k === t ? `✓ ${k}/${t}` : `${k}/${t}`) : "";
+    b.classList.toggle("full", k === t);
+  });
   const n = LIST.filter(p => Array.isArray(DONE[p.id]) && DONE[p.id].length).length;
   $("allRst").hidden = !n;
   $("allRst").textContent = n === 1 ? "Resetează toate bifele (1 scenariu)" : `Resetează toate bifele (${n} scenarii)`;
@@ -164,9 +173,21 @@ let cur = null, pushed = false;
 LIST.forEach(p => {
   const b = h("button", { class: "tab", "data-id": p.id },
     h("span", { class: "e" }, txt(p.e)),
-    h("span", { class: "t" }, short(p)));
+    h("span", { class: "t" }, short(p)),
+    h("span", { class: "p" }));
   on(b, "click", () => { buzz(8); pushed = true; location.hash = p.id; });
   ($("t" + (p.g || 1)) || $("t1")).appendChild(b);
+});
+
+/* Lățimea iconițelor (grilă de 12): rânduri de câte 3; până la 4 iconițe stau pe un rând;
+   la rest 2 → ultimele două mai late; la rest 1 → ultimele patru pe un rând */
+["t1", "t2", "t3"].forEach(id => {
+  const tabs = [...$(id).children], n = tabs.length;
+  const span = Array(n).fill(4);
+  if (n <= 4) span.fill(12 / n);
+  else if (n % 3 === 2) span[n - 1] = span[n - 2] = 6;
+  else if (n % 3 === 1) for (let i = n - 4; i < n; i++) span[i] = 3;
+  tabs.forEach((b, i) => { b.style.gridColumn = `span ${span[i]}`; });
 });
 
 /* Pagina 120 fps: sfatul fiecărui scenariu care are câmpul f în presets.js */
