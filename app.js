@@ -72,6 +72,7 @@ function build(p) {
   out.replaceChildren(
     h("h2", null, `${txt(p.e)} ${txt(p.n)}`),
     h("span", { class: "d" }, txt(p.d)),
+    txt(p.f) ? h("div", { class: "f120" }, h("span", null, "Slow motion"), txt(p.f)) : null,
     h("div", { class: "bar" },
       h("div", { class: "prog" }, cnt, h("div", { class: "track" }, fill)),
       rst),
@@ -129,6 +130,14 @@ LIST.forEach(p => {
   b.onclick = () => { buzz(8); pushed = true; location.hash = p.id; };
   ($("t" + (p.g || 1)) || $("t1")).appendChild(b);
 });
+
+/* Pagina 120 fps: sfatul fiecărui scenariu care are câmpul f în presets.js */
+(() => {
+  const withF = LIST.filter(p => txt(p.f));
+  $("fpsList").replaceChildren(...withF.map(p =>
+    h("li", null, h("b", null, `${txt(p.e)} ${txt(p.n)}`), h("span", null, txt(p.f)))));
+  $("fpsCard").hidden = !withF.length;
+})();
 
 function route() {
   const id = location.hash.slice(1);

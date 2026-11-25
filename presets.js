@@ -1,7 +1,7 @@
 /* ============================================================
    PRESETĂRI – aici adaugi / modifici scenariile.
    Format pentru un scenariu nou:
-   {id:"unic", g:1 sau 2, e:"emoji", n:"Nume", d:"descriere (opțional)", r:[
+   {id:"unic", g:1 sau 2, e:"emoji", n:"Nume", d:"descriere (opțional)", f:"sfat 120 fps (opțional)", r:[
      ["Setare","Valoare","notă mică (opțional)"],
      ...
    ]},
@@ -39,17 +39,17 @@ const P = [
   ["Culoare","D-Log M (10-bit)"],
   ["Stabilizare","RockSteady"],
   ["Image Adjustment","Sharpness -2\nNoise Red. -1"]]},
- {id:"walk",g:2,e:"🚶",n:"Night Walk",r:[
+ {id:"walk",g:2,e:"🚶",n:"Night Walk",f:"❌ Nu folosi 120 fps",r:[
   ["FPS","25"],["Shutter","1/100s"],["ISO","Auto 100–1600","3200 max"],
   ["FOV","Wide"],["White Balance","4000K"],["Stabilizare","RockSteady"],["EV / Filtru","—"]]},
- {id:"drive",g:2,e:"🚗",n:"Night Drive",r:[
+ {id:"drive",g:2,e:"🚗",n:"Night Drive",f:"❌ Nu folosi 120 fps",r:[
   ["FPS","25 / 50"],["Shutter","1/100–1/200s"],["ISO","Auto 100–800","1600 pe drum întunecat"],
   ["FOV","Wide"],["White Balance","4000K"],["Stabilizare","RockSteady","montaj fix"],["EV / Filtru","EV -0.3 / -0.7","opțional CPL"]]},
- {id:"sunny",g:2,e:"🏔️",n:"Sunny Snow",r:[
+ {id:"sunny",g:2,e:"🏔️",n:"Sunny Snow",f:"✅ 120 fps este excelent pentru slow motion",r:[
   ["FPS","50 / 60"],["Shutter","1/100s"],["ISO","100 sau Auto 100–400"],
   ["FOV","Wide","Ultra Wide pe selfie stick"],["White Balance","5500K–6000K"],
   ["Stabilizare","RockSteady / HorizonBalancing"],["EV / Filtru","ND16 / ND32","sau EV -0.7 / -1.0 fără ND"]]},
- {id:"fog",g:2,e:"🌫️",n:"Foggy Snow",r:[
+ {id:"fog",g:2,e:"🌫️",n:"Foggy Snow",f:"⚠️ 120 fps poate fi folosit, dar verifică expunerea; preferă 50 fps dacă lumina este slabă",r:[
   ["FPS","50","25 în furtună"],["Shutter","Auto"],["ISO","Auto 100–800"],
   ["FOV","Wide","Ultra Wide pe selfie stick"],["White Balance","5000K–5500K"],
   ["Stabilizare","RockSteady"],["EV / Filtru","EV -0.3 / 0","fără ND"]]},

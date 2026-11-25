@@ -41,6 +41,7 @@ jobs:
             if (![1, 2, 3].includes(p.g)) err.push(`${w}: g trebuie să fie 1, 2 sau 3`);
             str(p.e, `${w} emoji`); str(p.n, `${w} nume`);
             if (p.d !== undefined) str(p.d, `${w} descriere`);
+            if (p.f !== undefined) str(p.f, `${w} sfat 120 fps`);
             if (!Array.isArray(p.r) || !p.r.length) { err.push(`${w}: lipsesc setările (r)`); return; }
             const keys = new Set();
             p.r.forEach((row, j) => {
