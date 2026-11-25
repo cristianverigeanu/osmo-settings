@@ -7,6 +7,22 @@
 const $ = id => document.getElementById(id);
 const on = (el, type, fn, opt) => el.addEventListener(type, fn, opt);
 const out = $("out");
+
+/* Tema: întunecată (implicit) sau deschisă pentru afară, în soare. Alegerea se ține minte. */
+function setTheme(t) {
+  const light = t === "light";
+  if (light) document.documentElement.dataset.theme = "light";
+  else delete document.documentElement.dataset.theme;
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.content = light ? "#eef0f3" : "#0e1013";
+  $("thm").textContent = light ? "🌙 Întunecat" : "☀️ Soare";
+  try { localStorage.setItem("osmo-theme", light ? "light" : "dark"); } catch (e) {}
+}
+let theme = "dark";
+try { theme = localStorage.getItem("osmo-theme") || "dark"; } catch (e) {}
+setTheme(theme);
+on($("thm"), "click", () => setTheme(document.documentElement.dataset.theme === "light" ? "dark" : "light"));
+
 const buzz = ms => { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} };
 
 /* Construiește un element fără HTML: h("div", {class:"x"}, "text", copil, ...) */

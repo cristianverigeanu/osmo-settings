@@ -19,8 +19,25 @@
     --txt:#f3f4f6;--mut:#9ea5b0;--lbl:#c5cad2;
     --acc:#ff7a3d;--acc2:#ffb03d;--accbg:rgba(255,122,61,.12);
     --ok:#3ddc84;--okbg:rgba(61,220,132,.10);
+    --chip:#22262e;--soft:#262b33;--soft2:#30363f;--press:#1d2127;--ring:#3a404a;--bar:rgba(14,16,19,.92);
+    --oktxt:#86e8af;--okline:rgba(61,220,132,.4);--accline:rgba(255,122,61,.55);--shadow:rgba(0,0,0,.5);
+    --onacc:#1a0d06;--onok:#0b1a11;
     --r:18px;
   }
+  /* Tema deschisă (pentru afară, în soare): contrast mare, se pornește din butonul de sus */
+  :root[data-theme="light"]{
+    --bg:#eef0f3;--card:#ffffff;--card2:#f3f4f6;--line:#cdd2da;
+    --txt:#0b0d10;--mut:#4b5260;--lbl:#1f252d;
+    --acc:#c2410c;--acc2:#ea580c;--accbg:rgba(194,65,12,.10);
+    --ok:#15803d;--okbg:rgba(21,128,61,.10);
+    --chip:#e7eaee;--soft:#e3e6eb;--soft2:#d6dae0;--press:#eceef1;--ring:#7d8592;--bar:rgba(238,240,243,.94);
+    --oktxt:#11632f;--okline:rgba(21,128,61,.5);--accline:rgba(194,65,12,.6);--shadow:rgba(0,0,0,.18);
+    --onacc:#ffffff;--onok:#ffffff;
+  }
+  /* Butonul de temă (sus, pe pagina principală) */
+  .thm{margin-left:auto;display:flex;align-items:center;gap:6px;min-height:40px;padding:0 12px;border-radius:12px;
+    background:var(--card);border:1.5px solid var(--line);font-size:13.5px;font-weight:700;cursor:pointer}
+  .thm:active{background:var(--card2)}
   *{box-sizing:border-box;margin:0;padding:0}
   html{background:var(--bg)}
   body{background:var(--bg);color:var(--txt);font:16px/1.4 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif;
@@ -50,27 +67,27 @@
     background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:14px 6px 12px;text-align:center;cursor:pointer;
     transition:transform .12s,border-color .2s,background .2s}
   .tab:active{transform:scale(.95);background:var(--card2)}
-  .tab .e{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:#22262e;font-size:22px}
+  .tab .e{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:var(--chip);font-size:22px}
   .tab .t{font-size:13.5px;font-weight:700;line-height:1.2}
   /* Progresul bifelor pe iconiță */
   .tab .p{font-size:12px;font-weight:800;color:var(--acc);font-variant-numeric:tabular-nums;margin-top:-2px}
   .tab .p:empty{display:none}
   .tab.full .p{color:var(--ok)}
-  .tab.full{border-color:rgba(61,220,132,.45)}
+  .tab.full{border-color:var(--okline)}
 
   /* Rând subțire „Când folosești 120 fps” */
   .tip{display:flex;align-items:center;gap:12px;width:100%;min-height:60px;padding:8px 14px 8px 8px;border-radius:16px;
     background:var(--card);border:1.5px solid var(--line);text-align:left;cursor:pointer;transition:transform .12s,background .2s}
   .tip:active{transform:scale(.98);background:var(--card2)}
-  .tip .e{display:grid;place-items:center;flex:0 0 40px;height:40px;border-radius:12px;background:#22262e;font-size:22px}
+  .tip .e{display:grid;place-items:center;flex:0 0 40px;height:40px;border-radius:12px;background:var(--chip);font-size:22px}
   .tip .nm{flex:1;min-width:0}
   .tip .lb{display:block;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
   .tip .tt{display:block;font-size:15px;font-weight:700}
   .tip .ar{color:var(--acc);font-size:24px;line-height:1}
-  .tab.last{border-color:rgba(255,122,61,.55)}
+  .tab.last{border-color:var(--accline)}
   .tab.last .e{background:var(--accbg)}
   .tab.last::after{content:"ultimul";position:absolute;top:-8px;left:50%;transform:translateX(-50%);
-    background:var(--acc);color:#1a0d06;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:8px}
+    background:var(--acc);color:var(--onacc);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:8px}
 
   /* Info 120 fps */
   .info{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
@@ -88,7 +105,7 @@
 
   /* ===== PAGINA SCENARIULUI ===== */
   .now{position:sticky;top:0;z-index:10;margin:0 -14px 16px;padding:calc(10px + env(safe-area-inset-top)) 14px 0;
-    background:rgba(14,16,19,.92);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+    background:var(--bar);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
   .now-in{display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;text-align:left;cursor:pointer;padding:2px 0 10px;min-height:56px}
   .now .back{flex:0 0 auto;font-size:28px;line-height:1;color:var(--acc);font-weight:300;margin:0 2px 2px 0}
   .now .e{display:grid;place-items:center;flex:0 0 44px;height:44px;border-radius:13px;background:var(--accbg);border:1.5px solid var(--acc);font-size:24px}
@@ -97,7 +114,7 @@
   .now .tt{display:block;font-size:17px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .now .c{font-size:15px;font-weight:700;color:var(--mut);white-space:nowrap}
   .now .c b{color:var(--txt)}
-  .now .track{margin:0 -14px;height:4px;background:#20242b}
+  .now .track{margin:0 -14px;height:4px;background:var(--soft)}
   .now .fill{border-radius:0}
   .now.all .fill{background:var(--ok)}
   .now.all .c,.now.all .c b{color:var(--ok)}
@@ -106,18 +123,18 @@
   .card .top{border-bottom:1px solid var(--line);padding-bottom:14px}
   .card .d{display:block;color:var(--lbl);font-size:15px;font-weight:600;padding:14px 16px 0}
   .foot{display:flex;justify-content:center;padding:12px 16px 14px}
-  .track{height:8px;border-radius:8px;background:#262b33;overflow:hidden}
+  .track{height:8px;border-radius:8px;background:var(--soft);overflow:hidden}
   .fill{height:100%;width:0;border-radius:8px;background:linear-gradient(90deg,var(--acc),var(--acc2));transition:width .45s cubic-bezier(.2,.9,.3,1),background .3s}
   .card.all .fill{background:var(--ok)}
-  .rst{background:#262b33;border:0;border-radius:12px;padding:12px 14px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px}
-  .rst:active{background:#30363f}
+  .rst{background:var(--soft);border:0;border-radius:12px;padding:12px 14px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px}
+  .rst:active{background:var(--soft2)}
 
   .row{display:flex;align-items:center;gap:12px;padding:14px 16px;min-height:60px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .25s}
   .row:last-of-type{border-bottom:0}
-  .row:active{background:#1d2127}
-  .chk{flex:0 0 28px;width:28px;height:28px;border-radius:50%;border:2px solid #3a404a;display:grid;place-items:center;transition:border-color .2s,background .2s}
+  .row:active{background:var(--press)}
+  .chk{flex:0 0 28px;width:28px;height:28px;border-radius:50%;border:2px solid var(--ring);display:grid;place-items:center;transition:border-color .2s,background .2s}
   .chk svg{width:16px;height:16px}
-  .chk path{fill:none;stroke:#0b1a11;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:20;stroke-dashoffset:20;transition:stroke-dashoffset .3s .08s ease-out}
+  .chk path{fill:none;stroke:var(--onok);stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:20;stroke-dashoffset:20;transition:stroke-dashoffset .3s .08s ease-out}
   .k{color:var(--lbl);font-size:15px;font-weight:600;flex:0 0 34%}
   .v{flex:1;font-size:17px;font-weight:700;text-align:right;transition:color .25s}
   .vv{white-space:pre-line}
@@ -126,11 +143,11 @@
   .row.done{background:var(--okbg)}
   .row.done .chk{background:var(--ok);border-color:var(--ok);animation:pop .35s cubic-bezier(.3,1.6,.5,1)}
   .row.done .chk path{stroke-dashoffset:0}
-  .row.done .v{color:#86e8af}
+  .row.done .v{color:var(--oktxt)}
   .row.next .chk{border-color:var(--acc);box-shadow:0 0 0 4px var(--accbg)}
   @keyframes pop{0%{transform:scale(.6)}100%{transform:scale(1)}}
 
-  .ok{display:none;margin:12px;padding:16px;border-radius:14px;background:var(--okbg);border:1px solid rgba(61,220,132,.35);
+  .ok{display:none;margin:12px;padding:16px;border-radius:14px;background:var(--okbg);border:1px solid var(--okline);
     color:var(--ok);font-weight:800;font-size:17px;text-align:center}
   .card.all .ok{display:block;animation:rise .5s cubic-bezier(.3,1.4,.5,1)}
   @keyframes rise{0%{opacity:0;transform:translateY(10px) scale(.95)}100%{opacity:1;transform:none}}
@@ -141,13 +158,13 @@
 
   /* Swipe între scenarii */
   #scen{touch-action:pan-y}
-  .now .home{display:grid;place-items:center;flex:0 0 40px;height:40px;border-radius:12px;background:#22262e}
+  .now .home{display:grid;place-items:center;flex:0 0 40px;height:40px;border-radius:12px;background:var(--chip)}
   .now .home svg{width:20px;height:20px;fill:none;stroke:var(--txt);stroke-width:2;stroke-linejoin:round}
   .pn{display:flex;align-items:center;gap:8px;padding:0 0 10px}
   .pv,.nx{flex:1 1 0;min-width:0;display:flex;align-items:center;gap:6px;min-height:44px;padding:0 12px;border-radius:12px;
-    background:#1c2026;border:1px solid var(--line);font-size:13.5px;font-weight:700;cursor:pointer;transition:transform .12s,background .2s}
+    background:var(--card2);border:1px solid var(--line);font-size:13.5px;font-weight:700;cursor:pointer;transition:transform .12s,background .2s}
   .nx{justify-content:flex-end}
-  .pv:active,.nx:active{transform:scale(.96);background:#262b33}
+  .pv:active,.nx:active{transform:scale(.96);background:var(--soft)}
   .pt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .ar{color:var(--acc);font-size:22px;line-height:1;font-weight:400;margin-top:-2px}
   .dots{flex:0 0 auto;min-width:40px;text-align:center;font-size:12.5px;font-weight:700;color:var(--mut);font-variant-numeric:tabular-nums}
@@ -159,12 +176,12 @@
 
   /* Banner „Versiune nouă” (apare doar când există o actualizare) */
   .upd{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:50;display:flex;align-items:center;gap:12px;
-    padding:12px 12px 12px 16px;border-radius:16px;background:var(--card2);border:1px solid var(--line);box-shadow:0 8px 30px rgba(0,0,0,.5);
+    padding:12px 12px 12px 16px;border-radius:16px;background:var(--card2);border:1px solid var(--line);box-shadow:0 8px 30px var(--shadow);
     font-size:15px;font-weight:600;animation:rise .35s cubic-bezier(.3,1.4,.5,1)}
   .upd[hidden]{display:none}
   .upd span{flex:1}
-  .upd button{border:0;border-radius:12px;padding:12px 16px;min-height:44px;background:var(--acc);color:#1a0d06;font-weight:800;cursor:pointer}
-  .upd .x{background:#262b33;color:var(--txt);padding:12px 14px}
+  .upd button{border:0;border-radius:12px;padding:12px 16px;min-height:44px;background:var(--acc);color:var(--onacc);font-weight:800;cursor:pointer}
+  .upd .x{background:var(--soft);color:var(--txt);padding:12px 14px}
   .toast{z-index:51}
 
   /* Resetează toate bifele (pagina principală) */
@@ -173,10 +190,10 @@
 
   /* Ecran de pornire */
   .splash{position:fixed;inset:0;z-index:100;display:flex;align-items:flex-end;justify-content:center;
-    background:var(--bg) url(splash.jpg) center 40%/cover no-repeat;
+    background:#0e1013 url(splash.jpg) center 40%/cover no-repeat;color:#f3f4f6;
     padding:0 24px calc(56px + env(safe-area-inset-bottom));
     transition:opacity .45s ease,visibility 0s .45s;animation:spOut .45s ease 6s forwards}
-  .splash::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,16,19,0) 45%,rgba(14,16,19,.75) 75%,var(--bg) 100%)}
+  .splash::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,16,19,0) 45%,rgba(14,16,19,.75) 75%,#0e1013 100%)}
   .splash.gone{opacity:0;visibility:hidden}
   .sp-in{position:relative;width:100%;max-width:320px;text-align:center}
   .sp-t{font-size:28px;font-weight:800;letter-spacing:-.01em;text-shadow:0 2px 12px rgba(0,0,0,.5)}
@@ -204,7 +221,7 @@
 
 <!-- ===== PAGINA PRINCIPALĂ ===== -->
 <section class="page" id="home">
-  <div class="head"><span class="rec"></span><h1>DJI Osmo Action 4</h1></div>
+  <div class="head"><span class="rec"></span><h1>DJI Osmo Action 4</h1><button class="thm" id="thm" aria-label="Schimbă tema"></button></div>
   <p class="sub">Alege scenariul → bifează fiecare setare pe care ai făcut-o în cameră</p>
 
   <div class="group">Point &amp; Shoot</div>
